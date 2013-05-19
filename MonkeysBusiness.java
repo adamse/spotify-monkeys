@@ -54,11 +54,13 @@ class Monkey implements Serializable {
   List<Track> knownTracks;
   // Path to walk
   List<String> pathList;
+  List<Node> pathpathpath;
   Track targetTrack;
   int turn, turnLimit;
   int width, height;
   int remainingCapacity, remainingExecutionTime, boostCooldown;
   String[][] level;
+
 
   Monkey(String id) {
     this.id = id;
@@ -195,7 +197,9 @@ class Monkey implements Serializable {
       getClosestTrack();
       System.out.println(targetTrack.uri);
     } else if (pathList == null) {
-      getPath(targetTrack);
+      aStar();
+      System.err.println(pathpathpath);
+      //getPath(targetTrack);
     }
 	System.err.println("hej: " + pathList);
   }
@@ -227,6 +231,7 @@ class Monkey implements Serializable {
   }
 
   void aStar() {
+    pathpathpath = new LinkedList<Node>();
     Node start = new Node(x, y),
          goal = new Node(targetTrack.x, targetTrack.y);
 
@@ -252,6 +257,7 @@ class Monkey implements Serializable {
       }
 
       if (current.equals(goal)) {
+        reconstruct_path(came_from, goal);
         //return reconstruct_pah(came_from, goal);
       }
 
@@ -259,10 +265,31 @@ class Monkey implements Serializable {
       closedset.add(current);
 
       for (Node neighbour : getNeighborNodes(current)) {
+        Integer tentative_g_score = g_score.get(current) + 1;
+
+        if (closedset.contains(neighbour) && tentative_g_score >= g_score.get(neighbour)) {
+          continue;
+        }
+
+        if (!openset.contains(neighbour) || tentative_g_score < g_score.get(neighbour)) {
+          came_from.put(neighbour, current);
+          g_score.put(neighbour, tentative_g_score);
+          f_score.put(neighbour, g_score.get(neighbour) + Util.euclidDist(neighbour, goal));
+
+          openset.add(neighbour);
+        }
       }
     }
   }
 
+  void reconstruct_path(Map<Node, Node> came_from, Node current_node) {
+    if (came_from.containsKey(current_node)) {
+      reconstruct_path(came_from, came_from.get(current_node));
+      pathpathpath.add(current_node);
+    } else {
+      pathpathpath.add(current_node);
+    }
+  }
 
   void getPath(Track t) {
     pathList = new ArrayList<String>();
