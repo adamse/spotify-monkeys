@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
+import java.util.Collections;
 import java.io.Serializable;
 import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
@@ -52,6 +53,7 @@ class Monkey implements Serializable {
   List<Track> knownTracks;
   // Path to walk
   List<String> pathList;
+  Track targetTrack;
   int turn, turnLimit;
   int width, height;
   int remainingCapacity, remainingExecutionTime, boostCooldown;
@@ -164,7 +166,8 @@ class Monkey implements Serializable {
 
   }
 
-  Track getClosestTrack() {
+  /* Finds the closest unkown track, using the euclidian distance */
+  void getClosestTrack() {
     Track c = null;
 
     for (Track t : unknownTracks) {
@@ -177,9 +180,47 @@ class Monkey implements Serializable {
       }
     }
 
-    return c;
+    targetTrack = c;
   }
-  
+
+
+  void doTurn() {
+    /* Find the closest track if none is already found */
+    if (targetTrack == null) {
+      getClosestTrack();
+      System.out.println("spotify:track:" + targetTrack.uri);
+    } else if (pathList == null && trackTier() > 0) {
+
+      getPath(targetTrack);
+    }
+  }
+
+  int trackTier() {
+    Track t = knownURIs.get(targetTrack.uri);
+    int tier = 0;
+    if (dislikedArtists.contains(t.artist)) {
+      return -2;
+    } else if (topTracks.contains(t.name)) {
+      return -1;
+    }
+
+    if (topArtists.contains(t.artist)) {
+       tier++;
+    }
+
+    if (topAlbums.contains(t.album)) {
+      tier++;
+    }
+
+    if (Util.toDecade(Integer.parseInt(t.year)) == topDecade) {
+      tier++;
+    }
+
+    return tier;
+
+  }
+
+
   void getPath(Track t) {
 	pathList = new ArrayList<String>();
 	
