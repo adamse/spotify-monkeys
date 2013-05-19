@@ -50,6 +50,7 @@ class Monkey implements Serializable {
   List<Track> knownTracks;
   // Path to walk
   List<String> pathList;
+  Track targetTrack;
   int turn, turnLimit;
   int width, height;
   int remainingCapacity, remainingExecutionTime, boostCooldown;
@@ -163,7 +164,7 @@ class Monkey implements Serializable {
   }
 
   /* Finds the closest unkown track, using the euclidian distance */
-  Track getClosestTrack() {
+  void getClosestTrack() {
     Track c;
 
     for (Track t : unknownTracks) {
@@ -176,16 +177,54 @@ class Monkey implements Serializable {
       }
     }
 
-    return c;
+    targetTrack = c;
   }
-  
+
+
+  void doTurn() {
+    /* Find the closest track if none is already found */
+    if (targetTrack == null) {
+      getClosestTrack();
+      System.out.println("spotify:track:" + targetTrack.uri);
+    } else if (pathList == null && trackTier() > 0) {
+
+      getPath(targetTrack);
+    }
+  }
+
+  int trackTier() {
+    Track t = knownURIs.get(targetTrack.uri);
+    int tier = 0;
+    if (dislikedArtists.contains(t.artist)) {
+      return -2;
+    } else if (topTracks.contains(t.name)) {
+      return -1;
+    }
+
+    if (topArtists.contains(t.artist)) {
+       tier++;
+    }
+
+    if (topAlbums.contains(t.album)) {
+      tier++;
+    }
+
+    if (Util.toDecade(Integer.parseInt(t.year)) == topDecade) {
+      tier++;
+    }
+
+    return tier;
+
+  }
+
+
   void getPath(Track t) {
 	pathList = new ArrayList<String>();
   	// algorithm to find the shortest path
 	//for all steps {
 	//	pathList.add(step);
 	//}
-	
+
   }
 
   void writeToCache() throws Exception {
