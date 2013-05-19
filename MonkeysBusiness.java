@@ -48,6 +48,8 @@ class Monkey implements Serializable {
   // Tracks
   List<Track> unknownTracks;
   List<Track> knownTracks;
+  // Path to walk
+  List<String> pathList;
   int turn, turnLimit;
   int width, height;
   int remainingCapacity, remainingExecutionTime, boostCooldown;
@@ -174,6 +176,15 @@ class Monkey implements Serializable {
     }
 
     return c;
+  }
+  
+  void getPath(Track t) {
+	pathList = new ArrayList<String>();
+  	// algorithm to find the shortest path
+	//for all steps {
+	//	pathList.add(step);
+	//}
+	
   }
 
   void writeToCache() throws Exception {
