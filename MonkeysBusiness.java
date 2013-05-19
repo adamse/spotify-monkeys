@@ -139,7 +139,6 @@ class Monkey implements Serializable {
     sc.nextLine();
     for (int i = 0; i < numResults; i++) {
       String metadata = sc.nextLine();
-      System.err.println(metadata);
       Track knownTrack = Track.fromMetadata(metadata);
       // 0:[uri],1:[[track],[album],[artist],[year]]
       String[] parts = metadata.split(",", 2); // Was 1, perhaps wrong
@@ -155,6 +154,10 @@ class Monkey implements Serializable {
       String[] cells = row.split(",");
       for (int x = 0; x < width; x++) {
         level[x][y] = cells[x];
+		if(cells[x].equals(id)) {
+			this.x = x;
+			this.y = y;
+		}
         if (Util.isURI(cells[x])) {
           String uri = cells[x];
           if (!knownURIs.containsKey(uri)) {
@@ -194,7 +197,7 @@ class Monkey implements Serializable {
     } else if (pathList == null) {
       getPath(targetTrack);
     }
-    System.err.println("hej: " + pathList);
+	System.err.println("hej: " + pathList);
   }
 
   int trackTier() {
@@ -246,19 +249,16 @@ class Monkey implements Serializable {
         break;
       } else {
         for (Node nextNode : getNeighborNodes(currentNode)) {
-          System.err.println(nextNode);
           if (!visitedNodes.contains(nextNode)) {
             queue.add(nextNode);
             visitedNodes.add(nextNode);
 
-            //Look up of next node instead of previous.
             nextNodeMap.put(currentNode, nextNode);
           }
         }
       }
     }
 
-    System.err.println(nextNodeMap);
     for (Node node = sourceNode; node != null;) {
       Node next = nextNodeMap.get(node);
       if (next == null) break;
@@ -280,14 +280,18 @@ class Monkey implements Serializable {
     int x = current.x,
         y = current.y;
 
-      if (x != 0 && level[x - 1][y] == "_")
-        ret.add(new Node(x - 1, y));
-      if (x >= height && level[x + 1][y] == "_")
-        ret.add(new Node(x + 1, y));
-      if (y != 0 && level[x][y - 1] == "_")
-        ret.add(new Node(x, y - 1));
-      if (y >= width && level[x][y + 1] == "_")
-        ret.add(new Node(x, y + 1));
+	if (x != 0 && level[x - 1][y].equals("_")) {
+		ret.add(new Node(x - 1, y));
+	}
+	if (x <= height && level[x + 1][y].equals("_")) {
+		ret.add(new Node(x + 1, y));
+	}
+	if (y != 0 && level[x][y - 1].equals("_")) {
+		ret.add(new Node(x, y - 1));
+	}
+	if (y <= width && level[x][y + 1].equals("_")) {
+		ret.add(new Node(x, y + 1));
+	}
 
     return ret;
   }
