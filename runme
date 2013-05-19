@@ -1,2 +1,2 @@
 #!/bin/sh
-java -cp $(dirname $0) MonkeysBusiness "$@"
+java -Xmx2G -cp $(dirname $0) MonkeysBusiness "$@"
