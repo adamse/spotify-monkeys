@@ -157,6 +157,23 @@ class Monkey implements Serializable {
         }
       }
     }
+
+  }
+
+  Track getClosestTrack() {
+    Track c;
+
+    for (Track t : unknownTracks) {
+      if (c == null) {
+        c = t;
+      } else {
+        if (((t.x - x) ^ 2 + (t.y - y) ^ 2) < ((c.x - x) ^ 2 + (c.y - y) ^ 2)) {
+          c = t;
+        }
+      }
+    }
+
+    return c;
   }
 
   void writeToCache() throws Exception {
