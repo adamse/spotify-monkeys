@@ -11,7 +11,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.FileInputStream;
 
-public class DemoPlayer {
+public class MonkeysBusiness {
   public static void main(String[] args) throws Exception {
     Scanner sc = new Scanner(System.in);
     String roundType = sc.nextLine();
@@ -39,9 +39,9 @@ class Monkey implements Serializable {
   int x, y;
   // Toplists
   int topDecade;
-  Set<String> topTracks = new HashSet<String>(), 
-              topAlbums = new HashSet<String>(), 
-              topArtists = new HashSet<String>(), 
+  Set<String> topTracks = new HashSet<String>(),
+              topAlbums = new HashSet<String>(),
+              topArtists = new HashSet<String>(),
               dislikedArtists = new HashSet<String>();
   // URI dictionary
   Map<String, Track> knownURIs = new HashMap<String, Track>();
@@ -152,7 +152,7 @@ class Monkey implements Serializable {
           if (!knownURIs.containsKey(uri)) {
             unknownTracks.add(new Track(uri).place(x, y));
           } else {
-            knownTracks.add(knownURIs.get(uri).copy().place(x, y)); 
+            knownTracks.add(knownURIs.get(uri).copy().place(x, y));
           }
         }
       }
@@ -160,7 +160,7 @@ class Monkey implements Serializable {
   }
 
   void writeToCache() throws Exception {
-    ObjectOutputStream out = 
+    ObjectOutputStream out =
       new ObjectOutputStream(new FileOutputStream(CACHE_PREFIX + id));
     out.writeObject(this);
     out.close();
@@ -189,7 +189,7 @@ class Track implements Cloneable, Serializable {
 
   static Track fromMetadata(String metadata) {
     // 0:[uri],1:[name],2:[album],3:[artist],4:[year]
-    String[] parts = metadata.split(","); 
+    String[] parts = metadata.split(",");
     Track track = new Track(parts[0]);
     track.name = parts[1];
     track.album = parts[2];
@@ -218,7 +218,7 @@ class Track implements Cloneable, Serializable {
 }
 
 class Util {
-  /** 
+  /**
   * http://stackoverflow.com/questions/8545590/java-find-the-most-popular-element-in-int-array
   */
   static int getPopularElement(Integer[] a) {
