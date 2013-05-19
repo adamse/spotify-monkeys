@@ -197,8 +197,7 @@ class Monkey implements Serializable {
       getClosestTrack();
       System.out.println(targetTrack.uri);
     } else if (pathList == null) {
-      aStar();
-      System.err.println(pathpathpath);
+      getPath(targetTrack);
       //getPath(targetTrack);
     }
 	System.err.println("hej: " + pathList);
@@ -306,6 +305,8 @@ class Monkey implements Serializable {
     Set<Node> visitedNodes = new HashSet<Node>();
     visitedNodes.add(currentNode);
 
+	nextNodeMap.put(sourceNode, null);
+
     //Search.
     while (!queue.isEmpty()) {
       currentNode = queue.remove();
@@ -317,27 +318,28 @@ class Monkey implements Serializable {
             queue.add(nextNode);
             visitedNodes.add(nextNode);
 
-            nextNodeMap.put(currentNode, nextNode);
+            nextNodeMap.put(nextNode, currentNode);
           }
         }
       }
     }
-
-	nextNodeMap.put(currentNode, null);
-    for (Node node = sourceNode; node != null;) {
+    for (Node node = destinationNode; node != null;) {
       Node next = nextNodeMap.get(node);
       if (next == null) break;
 
       if(next.x + 1 == node.x && next.y == node.y)
-        pathList.add("W");
-      else if(next.x - 1 == node.x && next.y == node.y)
         pathList.add("E");
+      else if(next.x - 1 == node.x && next.y == node.y)
+        pathList.add("W");
       else if(next.x == node.x && next.y + 1 == node.y)
-        pathList.add("N");
-      else if(next.x == node.x && next.y - 1 == node.y)
         pathList.add("S");
+      else if(next.x == node.x && next.y - 1 == node.y)
+        pathList.add("N");
+	
+	  node = next;
     }
     Collections.reverse(pathList);
+	System.err.println(pathList);
   }
 
   List<Node> getNeighborNodes(Node current) {
@@ -345,16 +347,16 @@ class Monkey implements Serializable {
     int x = current.x,
         y = current.y;
 
-	if (x != 0 && level[x - 1][y].equals("_")) {
+	if ((x - 1 == targetTrack.y && y == targetTrack.x) || (x != 0 && level[x - 1][y].equals("_"))) {
 		ret.add(new Node(x - 1, y));
 	}
-	if (x <= height && level[x + 1][y].equals("_")) {
+	if ((x + 1 == targetTrack.y && y == targetTrack.x) || (x <= height && level[x + 1][y].equals("_"))) {
 		ret.add(new Node(x + 1, y));
 	}
-	if (y != 0 && level[x][y - 1].equals("_")) {
+	if ((y - 1 == targetTrack.x && x == targetTrack.y) || (y != 0 && level[x][y - 1].equals("_"))) {
 		ret.add(new Node(x, y - 1));
 	}
-	if (y <= width && level[x][y + 1].equals("_")) {
+	if ((y + 1 == targetTrack.x && x == targetTrack.y) || (y <= width && level[x][y + 1].equals("_"))) {
 		ret.add(new Node(x, y + 1));
 	}
 
