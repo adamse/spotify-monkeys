@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Scanner;
 import java.io.Serializable;
 import java.io.ObjectOutputStream;
@@ -163,7 +165,7 @@ class Monkey implements Serializable {
   }
 
   Track getClosestTrack() {
-    Track c;
+    Track c = null;
 
     for (Track t : unknownTracks) {
       if (c == null) {
@@ -180,11 +182,64 @@ class Monkey implements Serializable {
   
   void getPath(Track t) {
 	pathList = new ArrayList<String>();
-  	// algorithm to find the shortest path
-	//for all steps {
-	//	pathList.add(step);
-	//}
 	
+    Map<Node, Node> nextNodeMap = new HashMap<Node, Node>();
+	Node sourceNode = new Node(x, y);
+	Node destinationNode = new Node(t.x, t.y);
+    Node currentNode = sourceNode;
+
+    //Queue
+    Queue<Node> queue = new LinkedList<Node>();
+    queue.add(currentNode);
+
+    Set<Node> visitedNodes = new HashSet<Node>();
+    visitedNodes.add(currentNode);
+
+    //Search.
+    while (!queue.isEmpty()) {
+        currentNode = queue.remove();
+        if (currentNode.equals(destinationNode)) {
+            break;
+        } else {
+            for (Node nextNode : getNeighborNodes(currentNode)) {
+                if (!visitedNodes.contains(nextNode)) {
+                    queue.add(nextNode);
+                    visitedNodes.add(nextNode);
+
+                    //Look up of next node instead of previous.
+                    nextNodeMap.put(currentNode, nextNode);
+                }
+            }
+        }
+    }
+
+    for (Node node = sourceNode; node != null;) {
+		Node next = nextNodeMap.get(node);
+		if(next.x + 1 == node.x && next.y == node.y)
+			pathList.add("W");
+		if(next.x - 1 == node.x && next.y == node.y)
+			pathList.add("E");
+		if(next.x == node.x && next.y + 1 == node.y)
+			pathList.add("N");
+		if(next.x == node.x && next.y - 1 == node.y)
+			pathList.add("S");
+    }
+  	Collections.reverse(pathList);
+  }
+
+  List<Node> getNeighborNodes(Node current) {
+  	LinkedList ret = new LinkedList<Node>();
+  	
+  	if(level[current.x - 1][current.y] == "_") 
+		ret.add(new Node(current.x - 1, current.y));
+  	if(level[current.x + 1][current.y] == "_")
+		ret.add(new Node(current.x + 1, current.y));
+  	if(level[current.x][current.y - 1] == "_")
+		ret.add(new Node(current.x, current.y - 1));
+  	if(level[current.x][current.y + 1] == "_")
+		ret.add(new Node(current.x, current.y + 1));
+
+	return ret;
   }
 
   void writeToCache() throws Exception {
@@ -202,6 +257,18 @@ class Monkey implements Serializable {
     return monkey;
   }
 
+}
+
+class Node {
+  public int x, y;
+  Node() {
+    this.x = 0;
+    this.y = 0;
+  }
+  Node(int a, int b) {
+    this.x = a;
+    this.y = b;
+  }
 }
 
 class Track implements Cloneable, Serializable {
