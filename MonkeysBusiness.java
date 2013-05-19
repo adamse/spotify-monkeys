@@ -223,6 +223,43 @@ class Monkey implements Serializable {
 
   }
 
+  void aStar() {
+    Node start = new Node(x, y),
+         goal = new Node(targetTrack.x, targetTrack.y);
+
+    Set<Node> closedset = new HashSet<Node>(), // Evaluated nodes
+              openset = new HashSet<Node>();   // Nodes to be evaluated
+    openset.add(start);
+    Map<Node, Node> came_from = new HashMap<Node, Node>(); // Navigated nodes
+
+    Map<Node, Integer> g_score = new HashMap<Node, Integer>(), // Cost from start along best path
+                    f_score = new HashMap<Node, Integer>();    // Estimated cost
+
+    g_score.put(start, 0);
+    f_score.put(start, g_score.get(start) + Util.euclidDist(start, goal));
+
+    while (!openset.isEmpty()) {
+      Node current = null;
+      for (Node c : openset) {
+        if (current == null) {
+          current = c;
+        } else if (f_score.get(c) < f_score.get(current)) {
+          current = c;
+        }
+      }
+
+      if (current.equals(goal)) {
+        //return reconstruct_pah(came_from, goal);
+      }
+
+      openset.remove(current);
+      closedset.add(current);
+
+      for (Node neighbour : getNeighborNodes(current)) {
+      }
+    }
+  }
+
 
   void getPath(Track t) {
     pathList = new ArrayList<String>();
@@ -319,6 +356,19 @@ class Node {
     this.x = a;
     this.y = b;
   }
+
+  public boolean equals(Object o) {
+    if (o == null) return false;
+    if (o == this) return true;
+    if (!(o instanceof Node)) return false;
+
+    Node n = (Node) o;
+    return this.x == n.x && this.y == n.y;
+  }
+
+  public int hashCode() {
+    return (x + "," + y).hashCode();
+  }
 }
 
 class Track implements Cloneable, Serializable {
@@ -391,5 +441,9 @@ class Util {
 
   static boolean isURI(String s) {
     return s.length() == 36 && s.substring(0, 14).equals("spotify:track:");
+  }
+
+  static Integer euclidDist(Node a, Node b) {
+    return (int) Math.sqrt((b.x - a.x) ^ 2 + (b.y - a.y) ^ 2);
   }
 }
