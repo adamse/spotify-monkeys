@@ -139,9 +139,10 @@ class Monkey implements Serializable {
     sc.nextLine();
     for (int i = 0; i < numResults; i++) {
       String metadata = sc.nextLine();
+      System.err.println(metadata);
       Track knownTrack = Track.fromMetadata(metadata);
       // 0:[uri],1:[[track],[album],[artist],[year]]
-      String[] parts = metadata.split(",", 1);
+      String[] parts = metadata.split(",", 2); // Was 1, perhaps wrong
       knownURIs.put(parts[0], knownTrack);
     }
   }
@@ -190,15 +191,16 @@ class Monkey implements Serializable {
     if (targetTrack == null) {
       getClosestTrack();
       System.out.println(targetTrack.uri);
-    } else if (pathList == null && trackTier() > 0) {
-
+    } else if (pathList == null) {
       getPath(targetTrack);
     }
+    System.err.println("hej: " + pathList);
   }
 
   int trackTier() {
     Track t = knownURIs.get(targetTrack.uri);
     int tier = 0;
+
     if (dislikedArtists.contains(t.artist)) {
       return -2;
     } else if (topTracks.contains(t.name)) {
@@ -223,11 +225,11 @@ class Monkey implements Serializable {
 
 
   void getPath(Track t) {
-	pathList = new ArrayList<String>();
-	
+    pathList = new ArrayList<String>();
+
     Map<Node, Node> nextNodeMap = new HashMap<Node, Node>();
-	Node sourceNode = new Node(x, y);
-	Node destinationNode = new Node(t.x, t.y);
+    Node sourceNode = new Node(x, y);
+    Node destinationNode = new Node(t.x, t.y);
     Node currentNode = sourceNode;
 
     //Queue
@@ -239,49 +241,55 @@ class Monkey implements Serializable {
 
     //Search.
     while (!queue.isEmpty()) {
-        currentNode = queue.remove();
-        if (currentNode.equals(destinationNode)) {
-            break;
-        } else {
-            for (Node nextNode : getNeighborNodes(currentNode)) {
-                if (!visitedNodes.contains(nextNode)) {
-                    queue.add(nextNode);
-                    visitedNodes.add(nextNode);
+      currentNode = queue.remove();
+      if (currentNode.equals(destinationNode)) {
+        break;
+      } else {
+        for (Node nextNode : getNeighborNodes(currentNode)) {
+          System.err.println(nextNode);
+          if (!visitedNodes.contains(nextNode)) {
+            queue.add(nextNode);
+            visitedNodes.add(nextNode);
 
-                    //Look up of next node instead of previous.
-                    nextNodeMap.put(currentNode, nextNode);
-                }
-            }
+            //Look up of next node instead of previous.
+            nextNodeMap.put(currentNode, nextNode);
+          }
         }
+      }
     }
 
+    System.err.println(nextNodeMap);
     for (Node node = sourceNode; node != null;) {
-		Node next = nextNodeMap.get(node);
-		if(next.x + 1 == node.x && next.y == node.y)
-			pathList.add("W");
-		if(next.x - 1 == node.x && next.y == node.y)
-			pathList.add("E");
-		if(next.x == node.x && next.y + 1 == node.y)
-			pathList.add("N");
-		if(next.x == node.x && next.y - 1 == node.y)
-			pathList.add("S");
+      Node next = nextNodeMap.get(node);
+      if (next == null) break;
+
+      if(next.x + 1 == node.x && next.y == node.y)
+        pathList.add("W");
+      if(next.x - 1 == node.x && next.y == node.y)
+        pathList.add("E");
+      if(next.x == node.x && next.y + 1 == node.y)
+        pathList.add("N");
+      if(next.x == node.x && next.y - 1 == node.y)
+        pathList.add("S");
     }
-  	Collections.reverse(pathList);
+    Collections.reverse(pathList);
   }
 
   List<Node> getNeighborNodes(Node current) {
-  	LinkedList ret = new LinkedList<Node>();
-  	
-  	if(level[current.x - 1][current.y] == "_") 
-		ret.add(new Node(current.x - 1, current.y));
-  	if(level[current.x + 1][current.y] == "_")
-		ret.add(new Node(current.x + 1, current.y));
-  	if(level[current.x][current.y - 1] == "_")
-		ret.add(new Node(current.x, current.y - 1));
-  	if(level[current.x][current.y + 1] == "_")
-		ret.add(new Node(current.x, current.y + 1));
+    LinkedList<Node> ret = new LinkedList<Node>();
+    int x = current.x,
+        y = current.y;
 
-	return ret;
+      if (x != 0 && level[x - 1][y] == "_")
+        ret.add(new Node(x - 1, y));
+      if (x >= height && level[x + 1][y] == "_")
+        ret.add(new Node(x + 1, y));
+      if (y != 0 && level[x][y - 1] == "_")
+        ret.add(new Node(x, y - 1));
+      if (y >= width && level[x][y + 1] == "_")
+        ret.add(new Node(x, y + 1));
+
+    return ret;
   }
 
   void writeToCache() throws Exception {
