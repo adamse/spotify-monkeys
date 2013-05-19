@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.FileInputStream;
 
+
 public class MonkeysBusiness {
   public static void main(String[] args) throws Exception {
     Scanner sc = new Scanner(System.in);
@@ -143,7 +144,7 @@ class Monkey implements Serializable {
       String metadata = sc.nextLine();
       Track knownTrack = Track.fromMetadata(metadata);
       // 0:[uri],1:[[track],[album],[artist],[year]]
-      String[] parts = metadata.split(",", 2); // Was 1, perhaps wrong
+      String[] parts = metadata.split(",", 2);
       knownURIs.put(parts[0], knownTrack);
     }
   }
@@ -156,10 +157,12 @@ class Monkey implements Serializable {
       String[] cells = row.split(",");
       for (int x = 0; x < width; x++) {
         level[x][y] = cells[x];
-		if(cells[x].equals(id)) {
-			this.x = x;
-			this.y = y;
-		}
+
+        if(cells[x].equals(id)) {
+          this.x = x;
+          this.y = y;
+        }
+
         if (Util.isURI(cells[x])) {
           String uri = cells[x];
           if (!knownURIs.containsKey(uri)) {
@@ -180,10 +183,8 @@ class Monkey implements Serializable {
     for (Track t : unknownTracks) {
       if (c == null) {
         c = t;
-      } else {
-        if (((t.x - x) ^ 2 + (t.y - y) ^ 2) < ((c.x - x) ^ 2 + (c.y - y) ^ 2)) {
-          c = t;
-        }
+      } else if (((t.x - x) ^ 2 + (t.y - y) ^ 2) < ((c.x - x) ^ 2 + (c.y - y) ^ 2)) {
+        c = t;
       }
     }
 
@@ -195,12 +196,13 @@ class Monkey implements Serializable {
     /* Find the closest track if none is already found */
     if (targetTrack == null) {
       getClosestTrack();
-      System.out.println(targetTrack.uri);
+      System.out.println(targetTrack.x + "," + targetTrack.y +"::" +targetTrack.uri);
     } else if (pathpathpath == null) {
-      aStar();
-      //getPath(targetTrack);
+      if (aStar() != 0) {
+        System.err.println("No path was found");
+      }
+      pathList = Util.nodesToCommands(pathpathpath);
     }
-    System.err.println(pathpathpath);
   }
 
   int trackTier() {
@@ -229,10 +231,11 @@ class Monkey implements Serializable {
 
   }
 
-  void aStar() {
+  int aStar() {
     pathpathpath = new LinkedList<Node>();
     Node start = new Node(x, y),
-         goal = new Node(targetTrack.x, targetTrack.y);
+         goal = new Node(2,3);
+
 
     Set<Node> closedset = new HashSet<Node>(), // Evaluated nodes
               openset = new HashSet<Node>();   // Nodes to be evaluated
@@ -257,13 +260,15 @@ class Monkey implements Serializable {
 
       if (current.equals(goal)) {
         reconstruct_path(came_from, goal);
-        //return reconstruct_pah(came_from, goal);
+        return 0; // A path was found
       }
 
       openset.remove(current);
       closedset.add(current);
 
-      for (Node neighbour : getNeighborNodes(current)) {
+      List<Node> neighbours = getNeighborNodes(current);
+
+      for (Node neighbour : neighbours) {
         Integer tentative_g_score = g_score.get(current) + 1;
 
         if (closedset.contains(neighbour) && tentative_g_score >= g_score.get(neighbour)) {
@@ -279,63 +284,15 @@ class Monkey implements Serializable {
         }
       }
     }
+
+    return -1; // No path was found
   }
 
   void reconstruct_path(Map<Node, Node> came_from, Node current_node) {
     if (came_from.containsKey(current_node)) {
       reconstruct_path(came_from, came_from.get(current_node));
     }
-    System.err.println(current_node);
     pathpathpath.add(current_node);
-  }
-
-  void getPath(Track t) {
-    pathList = new ArrayList<String>();
-
-    Map<Node, Node> nextNodeMap = new HashMap<Node, Node>();
-    Node sourceNode = new Node(x, y);
-    Node destinationNode = new Node(t.x, t.y);
-    Node currentNode = sourceNode;
-
-    //Queue
-    Queue<Node> queue = new LinkedList<Node>();
-    queue.add(currentNode);
-
-    Set<Node> visitedNodes = new HashSet<Node>();
-    visitedNodes.add(currentNode);
-
-    //Search.
-    while (!queue.isEmpty()) {
-      currentNode = queue.remove();
-      if (currentNode.equals(destinationNode)) {
-        break;
-      } else {
-        for (Node nextNode : getNeighborNodes(currentNode)) {
-          if (!visitedNodes.contains(nextNode)) {
-            queue.add(nextNode);
-            visitedNodes.add(nextNode);
-
-            nextNodeMap.put(currentNode, nextNode);
-          }
-        }
-      }
-    }
-
-	nextNodeMap.put(currentNode, null);
-    for (Node node = sourceNode; node != null;) {
-      Node next = nextNodeMap.get(node);
-      if (next == null) break;
-
-      if(next.x + 1 == node.x && next.y == node.y)
-        pathList.add("W");
-      else if(next.x - 1 == node.x && next.y == node.y)
-        pathList.add("E");
-      else if(next.x == node.x && next.y + 1 == node.y)
-        pathList.add("N");
-      else if(next.x == node.x && next.y - 1 == node.y)
-        pathList.add("S");
-    }
-    Collections.reverse(pathList);
   }
 
   List<Node> getNeighborNodes(Node current) {
@@ -343,18 +300,18 @@ class Monkey implements Serializable {
     int x = current.x,
         y = current.y;
 
-	if (x != 0 && level[x - 1][y].equals("_")) {
-		ret.add(new Node(x - 1, y));
-	}
-	if (x <= height && level[x + 1][y].equals("_")) {
-		ret.add(new Node(x + 1, y));
-	}
-	if (y != 0 && level[x][y - 1].equals("_")) {
-		ret.add(new Node(x, y - 1));
-	}
-	if (y <= width && level[x][y + 1].equals("_")) {
-		ret.add(new Node(x, y + 1));
-	}
+    if (x != 0 && level[x - 1][y].equals("_")) {
+      ret.add(new Node(x - 1, y));
+    }
+    if (x <= height && level[x + 1][y].equals("_")) {
+      ret.add(new Node(x + 1, y));
+    }
+    if (y != 0 && level[x][y - 1].equals("_")) {
+      ret.add(new Node(x, y - 1));
+    }
+    if (y <= width && level[x][y + 1].equals("_")) {
+      ret.add(new Node(x, y + 1));
+    }
 
     return ret;
   }
@@ -376,7 +333,7 @@ class Monkey implements Serializable {
 
 }
 
-class Node {
+class Node implements Serializable {
   public int x, y;
   Node() {
     this.x = 0;
@@ -385,6 +342,10 @@ class Node {
   Node(int a, int b) {
     this.x = a;
     this.y = b;
+  }
+
+  public String toString() {
+    return x + "," + y;
   }
 
   public boolean equals(Object o) {
@@ -442,38 +403,3 @@ class Track implements Cloneable, Serializable {
   @Override public int hashCode() { return uri.hashCode(); }
 }
 
-class Util {
-  /**
-  * http://stackoverflow.com/questions/8545590/java-find-the-most-popular-element-in-int-array
-  */
-  static int getPopularElement(Integer[] a) {
-    int count = 1, tempCount;
-    int popular = a[0];
-    int temp = 0;
-    for (int i = 0; i < (a.length - 1); i++) {
-      temp = a[i];
-      tempCount = 0;
-      for (int j = 1; j < a.length; j++) {
-        if (temp == a[j])
-          tempCount++;
-      }
-      if (tempCount > count) {
-        popular = temp;
-        count = tempCount;
-      }
-    }
-    return popular;
-  }
-
-  static int toDecade(int year) {
-    return (year % 100) / 10;
-  }
-
-  static boolean isURI(String s) {
-    return s.length() == 36 && s.substring(0, 14).equals("spotify:track:");
-  }
-
-  static Integer euclidDist(Node a, Node b) {
-    return (int) Math.sqrt((b.x - a.x) ^ 2 + (b.y - a.y) ^ 2);
-  }
-}
