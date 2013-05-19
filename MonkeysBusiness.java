@@ -193,12 +193,11 @@ class Monkey implements Serializable {
     if (targetTrack == null) {
       getClosestTrack();
       System.out.println(targetTrack.uri);
-    } else if (pathList == null) {
+    } else if (pathpathpath == null) {
       aStar();
-      System.err.println(pathpathpath);
       //getPath(targetTrack);
     }
-    System.err.println("hej: " + pathList);
+    System.err.println(pathpathpath);
   }
 
   int trackTier() {
@@ -282,10 +281,9 @@ class Monkey implements Serializable {
   void reconstruct_path(Map<Node, Node> came_from, Node current_node) {
     if (came_from.containsKey(current_node)) {
       reconstruct_path(came_from, came_from.get(current_node));
-      pathpathpath.add(current_node);
-    } else {
-      pathpathpath.add(current_node);
     }
+    System.err.println(current_node);
+    pathpathpath.add(current_node);
   }
 
   void getPath(Track t) {
