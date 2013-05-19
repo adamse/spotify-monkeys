@@ -26,6 +26,7 @@ public class MonkeysBusiness {
     } else {
       monkey = Monkey.readFromCache(id);
       monkey.turn(sc);
+	  monkey.doTurn();
     }
     sc.close();
     monkey.writeToCache();
@@ -188,7 +189,7 @@ class Monkey implements Serializable {
     /* Find the closest track if none is already found */
     if (targetTrack == null) {
       getClosestTrack();
-      System.out.println("spotify:track:" + targetTrack.uri);
+      System.out.println(targetTrack.uri);
     } else if (pathList == null && trackTier() > 0) {
 
       getPath(targetTrack);
