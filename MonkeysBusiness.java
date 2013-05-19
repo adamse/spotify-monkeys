@@ -160,6 +160,7 @@ class Monkey implements Serializable {
 
   }
 
+  /* Finds the closest unkown track, using the euclidian distance */
   Track getClosestTrack() {
     Track c;
 
