@@ -296,17 +296,18 @@ class Monkey implements Serializable {
       }
     }
 
+	nextNodeMap.put(currentNode, null);
     for (Node node = sourceNode; node != null;) {
       Node next = nextNodeMap.get(node);
       if (next == null) break;
 
       if(next.x + 1 == node.x && next.y == node.y)
         pathList.add("W");
-      if(next.x - 1 == node.x && next.y == node.y)
+      else if(next.x - 1 == node.x && next.y == node.y)
         pathList.add("E");
-      if(next.x == node.x && next.y + 1 == node.y)
+      else if(next.x == node.x && next.y + 1 == node.y)
         pathList.add("N");
-      if(next.x == node.x && next.y - 1 == node.y)
+      else if(next.x == node.x && next.y - 1 == node.y)
         pathList.add("S");
     }
     Collections.reverse(pathList);
